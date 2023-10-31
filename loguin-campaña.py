@@ -1,8 +1,12 @@
 import tkinter as tk
-
 from tkinter import * 
 from tkinter import ttk
 import webbrowser
+import time
+import mysql.connector
+
+miCon = mysql.connector.connect( host='localhost', user= 'root', passwd='', db='hospital-campaña-ctes' )
+cur = miCon.cursor()
 
 
 ventana= tk.Tk()
@@ -13,16 +17,16 @@ ventana.iconbitmap("H_C.ico")
 
 
 
-
+# login
 loginframe=Frame()
 loginframe.pack(side="bottom",anchor="center")
 loginframe.config(width="840",height="800", bg="skyblue",bd=15,relief="groove")
 loginframe.config(relief="sunken")
 # .image("campaña.jpg")
 
+#variables
 usuario=tk.StringVar()
 password=tk.StringVar()
-
 
 
 lebelUsuario=Label(loginframe, text="USUARIO", font=("sant serif",20),fg="Blue",background="skyblue" )
@@ -31,25 +35,46 @@ textoUsuario=tk.Entry(ventana, textvar=usuario, width=30, relief="flat")
 textoUsuario.place(x="40", y="300", width=200, height=30)
 textoUsuario.config(justify="right")
 
-lebelContraseña=Label(loginframe, text="CONTRASEÑA", font=("sant serif",20),fg="Blue",background="skyblue" )
-lebelContraseña.place(x="20",y="350")
-textoContraseña=tk.Entry(ventana, textvar=password, width=30, relief="flat")
-textoContraseña.place(x="40", y="400",width=200,height=30)
-textoContraseña.config(justify="right", show="*")
+lebelContrasena=Label(loginframe, text="CONTRASEÑA", font=("sant serif",20),fg="Blue",background="skyblue" )
+lebelContrasena.place(x="20",y="350")
+textoContrasena=tk.Entry(ventana, textvar=password, width=30, relief="flat")
+textoContrasena.place(x="40", y="400",width=200,height=30)
+textoContrasena.config(justify="right", show="*")
+
+ #funciones
+def guardar_datos():
+    # Obtener los valores de los cuadros de texto
+    
+    usuario = textoUsuario.get()
+    contrasena = textoContrasena.get()
+
+    consulta = "INSERT INTO login (DNI_Personal, Contrasena) VALUES (%s, %s )"
+    valores = (int(usuario), contrasena)
+    cur.execute(consulta, valores)
+
+    miCon.commit()
+    miCon.close()
+
+
+crear_button=tk.Button(ventana, text='Ingresar', command=guardar_datos, cursor="hand2", width=14, height=3, fg="blue", background="skyblue", activeforeground="green")
+crear_button.pack()
+crear_button.place(x="300",y="500")
+
+
+
 def login():
     nombre=usuario.get()
     contraseña=password.get()
-    if nombre == "hipolito" and contraseña == "1234":
+    if nombre == "12345678" and contraseña == "1234":
         correcta()
     else:
         incorrecta()
 
-# a=ttk.Style()
-# a.configure("Boton1.TButton",foreground="red", background="skyBlue")
-# a.map("Boton1.TButton", foregrond= [("active", "blue")])
+
 
 Boton1=tk.Button(ventana, text='Ingresar', command=login, cursor="hand2", width=14, height=3, fg="blue", background="skyblue", activeforeground="green")
 Boton1.place(x="80",y="500")
+
 
 def incorrecta():
     incorrect= Tk()
@@ -178,25 +203,17 @@ def correcta():
     buttonsigiente=Button(raiz, text="PUCO", font="15", background="black", fg="red", command=obras_sociales)
     buttonsigiente.place(x="400",y="350")
     
+   
 
+
+
+# salir de la app
     def cerrarSecion():
         raiz.destroy()
 
     buttonCerrarSesion=Button(raiz, text="CERRAR SESION",command=cerrarSecion, font="15",  background="black", fg="red")
     buttonCerrarSesion.place(x="300",y="500")
 
-    raiz.configure(bg="wheat")
-
-    Opcion= tk.LebelFrame(raiz,bg="wheat" )
-    Opcion_Seleccionada= tk.IntVar()
-    Opcion_Si=tk.Radiobutton(Opcion, text="SI",font="consola 16", bg="wheat", fg="black",variable=Opcion_Seleccionada, value=1,x="300",y="410")
-    Opcion_Si.pack()
-
-    Opcion= tk.LebelFrame(raiz,bg="wheat" )
-    Opcion_Seleccionada= tk.IntVar()
-    Opcion_No=tk.Radiobutton(Opcion, text="NO", bg="wheat", variable=Opcion_Seleccionada, value=2)
-    Opcion_No.pack()
-    
 
     raiz.mainloop()
     
