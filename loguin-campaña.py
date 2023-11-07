@@ -1,101 +1,102 @@
 import tkinter as tk
-from tkinter import * 
-from tkinter import ttk
+from tkinter import *
+from tkinter import messagebox
 import webbrowser
 import time
 import mysql.connector
+from PIL import ImageTk, Image
+
 
 miCon = mysql.connector.connect( host='localhost', user= 'root', passwd='', db='hospital-campaña-ctes' )
 cur = miCon.cursor()
 
+loginframe = tk.Tk()
+loginframe.title("Hospital de Campaña Corrientes")
+loginframe.geometry("600x600+600+60")
+loginframe.resizable(width=False, height=False)
+loginframe.iconbitmap("H_C.ico")
 
-ventana= tk.Tk()
-ventana.title("Hospital de Campaña Corrientes")
-ventana.geometry("600x600+600+60")
-ventana.resizable(width=False, height=False)
-ventana.iconbitmap("H_C.ico")
+# Carga la imagen y ajusta su tamaño para que llene todo el frame
+imagen = Image.open("imagen_login.jpg")
+imagen = imagen.resize((600, 600))
+imagen = ImageTk.PhotoImage(imagen)
 
+# Crea una etiqueta para mostrar la imagen como fondo
+etiqueta = Label(loginframe, image=imagen)
+etiqueta.place(x=0, y=0, relwidth=1, relheight=1)
 
-
-# login
-loginframe=Frame()
-loginframe.pack(side="bottom",anchor="center")
-loginframe.config(width="840",height="800", bg="skyblue",bd=15,relief="groove")
-loginframe.config(relief="sunken")
-# .image("campaña.jpg")
+# Configura el frame
+loginframe.config(bg="skyblue", bd=15, relief="groove")
 
 #variables
 usuario=tk.StringVar()
 password=tk.StringVar()
 
 
-lebelUsuario=Label(loginframe, text="USUARIO", font=("sant serif",20),fg="Blue",background="skyblue" )
-lebelUsuario.place(x="55",y="250")
-textoUsuario=tk.Entry(ventana, textvar=usuario, width=30, relief="flat")
-textoUsuario.place(x="40", y="300", width=200, height=30)
-textoUsuario.config(justify="right")
+lebelUsuario=Label(loginframe, text="USUARIO", font=("sant serif",30),fg="red",background="grey" )
+lebelUsuario.place(x="200",y="50")
+lebelUsuario.config(borderwidth=3, relief="raised")
+textoUsuario=tk.Entry(loginframe, textvar=usuario, width=30, relief="flat")
+textoUsuario.place(x="170", y="110", width=250, height=30,)
+textoUsuario.config(justify="right",bg="skyblue",fg="blue", font=12, borderwidth=3, relief="raised")
 
-lebelContrasena=Label(loginframe, text="CONTRASEÑA", font=("sant serif",20),fg="Blue",background="skyblue" )
-lebelContrasena.place(x="20",y="350")
-textoContrasena=tk.Entry(ventana, textvar=password, width=30, relief="flat")
-textoContrasena.place(x="40", y="400",width=200,height=30)
-textoContrasena.config(justify="right", show="*")
 
- #funciones
+lebelContrasena=Label(loginframe, text="CONTRASEÑA", font=("sant serif",30),fg="red",background="grey" )
+lebelContrasena.place(x="145",y="180")
+lebelContrasena.config(borderwidth=3, relief="raised")
+textoContrasena=tk.Entry(loginframe, textvar=password, width=100, relief="flat")
+textoContrasena.place(x="140", y="240",width=300,height=30)
+textoContrasena.config(justify="right", show="*",bg="skyblue",fg="blue", font=12,borderwidth=3, relief="raised")
+
+#funciones login
+
+usuario = textoUsuario.get()
+contrasena = textoContrasena.get()
+
 def guardar_datos():
-    # Obtener los valores de los cuadros de texto
-    
     usuario = textoUsuario.get()
     contrasena = textoContrasena.get()
 
     consulta = "INSERT INTO login (DNI_Personal, Contrasena) VALUES (%s, %s )"
     valores = (int(usuario), contrasena)
-    cur.execute(consulta, valores)
+    cur.execute(consulta,valores)
 
     miCon.commit()
-    miCon.close()
+    messagebox.showinfo(title=None, message="Registro Exitoso")
+    borrar_datos_adm()
 
-
-crear_button=tk.Button(ventana, text='Ingresar', command=guardar_datos, cursor="hand2", width=14, height=3, fg="blue", background="skyblue", activeforeground="green")
-crear_button.pack()
-crear_button.place(x="300",y="500")
-
+def borrar_datos_adm():
+    textoUsuario.delete(0, tk.END)
+    textoContrasena.delete(0, tk.END)
 
 
 def login():
-    nombre=usuario.get()
-    contraseña=password.get()
-    if nombre == "12345678" and contraseña == "1234":
-        correcta()
+    usuario = textoUsuario.get()
+    contrasena = textoContrasena.get()   
+    cur.execute("SELECT Contrasena FROM login WHERE DNI_Personal='"+usuario+"' and Contrasena='"+contrasena+"'")
+    if cur.fetchall():
+        messagebox.showinfo(title="Acceso", message="Acceso correcto")
+        correcta()         
     else:
-        incorrecta()
+        messagebox.showinfo(title="Acceso", message="Usuario o contraseña incorrectos")   
+    loginframe.withdraw()  
+    miCon.close()          
 
+#botones login
 
+crear_button=tk.Button(loginframe, text='Registrarse', command=guardar_datos, font=10, cursor="hand2", width=14, height=3, fg="cyan", background="grey", activeforeground="green")
+crear_button.pack()
+crear_button.config(borderwidth=5, relief="raised")
+crear_button.place(x="370",y="400")    
+     
+Boton1=tk.Button(loginframe, text='Ingresar', command=login, font=10, cursor="hand2", width=14, height=3, fg="cyan", background="grey", activeforeground="green")
+Boton1.place(x="100",y="400")
+Boton1.config(borderwidth=5, relief="raised")
 
-Boton1=tk.Button(ventana, text='Ingresar', command=login, cursor="hand2", width=14, height=3, fg="blue", background="skyblue", activeforeground="green")
-Boton1.place(x="80",y="500")
-
-
-def incorrecta():
-    incorrect= Tk()
-    incorrect.title("Hospital de Campaña Corrientes")
-    incorrect.geometry("400x200+200+40")
-    incorrect.resizable(width=False, height=False)
-    incorrect.title("Hospital de Campaña Corrientes")
-    
-    incorrect.iconbitmap("H_C.ico")
-    incorrect.config(bg="blue")
-    incorrect.config(bd=0.5)
-    incorrect.config(relief="groove")
-    lebelincorrecto=Label(incorrect, text="Usuario o Contraseña Incorrecta", bg="red", font=("comic sans ms",15),fg="skyblue")
-    lebelincorrecto.place(x="50",y="80")
-
-    incorrect.mainloop()
-
-
+#funcines registro paciente 
 
 def correcta():
-    ventana.withdraw()
+    loginframe.withdraw()
     raiz= Tk()
     raiz.title("Hospital de Campaña Corrientes")
     raiz.geometry("800x600+800+60")
@@ -105,11 +106,12 @@ def correcta():
     raiz.config(relief="groove")
     raiz.resizable(width=False, height=False)
 
-    lebeladmision=Label(raiz, text="ADMISION", bg="Skyblue", font=("comic sans ms",25),fg="white")
-    lebeladmision.place(x="50",y="20")
+    lebeladmision=Label(raiz, text="ADMISION", bg="Skyblue", font=("comic sans ms",35),fg="red", borderwidth=0.5, relief="raised")
+    lebeladmision.place(x="50",y="10")
+
 
     #lebel datos paciente
-    lebeldatospac=Label(raiz, text="Datos Paciente", bg="orange", font=("comic sans ms",15),fg="white" )
+    lebeldatospac=Label(raiz, text="Datos Paciente", bg="cyan", font=("comic sans ms",15),fg="red" )
     lebeldatospac.place(x="50",y="100")
     lebelnombre_pac=Label(raiz, text="Nombre :", font=("comic sans ms",10),fg="black" )
     lebelnombre_pac.place(x="50",y="210")
@@ -120,23 +122,8 @@ def correcta():
     lebelfecha_nac=Label(raiz, text="Fecha Nac :", font=("comic sans ms",10),fg="black" )
     lebelfecha_nac.place(x="50",y="240")
 
-    #cadros de textos datos paciente
-    cuadrotnombre_pac=Entry(raiz)
-    cuadrotnombre_pac.place(x="200",y="210")
-    cuadrotnombre_pac.config(justify="right")
-    cuadrotapellido_pac=Entry(raiz)
-    cuadrotapellido_pac.place(x="200",y="180")
-    cuadrotapellido_pac.config(justify="right")
-    cuadrotdni_pac=Entry(raiz)
-    cuadrotdni_pac.place(x="200",y="150")
-    cuadrotdni_pac.config(justify="right")
-    cuadrotfecha_nac_pac=Entry(raiz)
-    cuadrotfecha_nac_pac.place(x="200",y="240")
-    cuadrotfecha_nac_pac.config(justify="right")
-
-
     #lebel contacto paciente
-    lebelcontacac=Label(raiz, text="Contacto Paciente", bg="orange", font=("comic sans ms",15),fg="white" )
+    lebelcontacac=Label(raiz, text="Contacto Paciente", bg="cyan", font=("comic sans ms",15),fg="red" )
     lebelcontacac.place(x="400",y="100")
     lebelcelular_pac=Label(raiz, text="Num Celular :", font=("comic sans ms",10),fg="black" )
     lebelcelular_pac.place(x="400",y="150")
@@ -151,77 +138,147 @@ def correcta():
     lebelcorreo_elec_pac=Label(raiz, text="Correo Elec. :", font=("comic sans ms",10),fg="black" )
     lebelcorreo_elec_pac.place(x="400",y="300")
 
+
+    #cadros de textos datos paciente
+    cuadrotnombre_pac=tk.Entry(raiz)
+    cuadrotnombre_pac.place(x="200",y="210")
+    cuadrotnombre_pac.config(justify="right")
+    cuadrotapellido_pac=tk.Entry(raiz)
+    cuadrotapellido_pac.place(x="200",y="180")
+    cuadrotapellido_pac.config(justify="right")
+    cuadrotdni_pac=tk.Entry(raiz)
+    cuadrotdni_pac.place(x="200",y="150")
+    cuadrotdni_pac.config(justify="right")
+    cuadrotfecha_nac_pac=tk.Entry(raiz)
+    cuadrotfecha_nac_pac.place(x="200",y="240")
+    cuadrotfecha_nac_pac.config(justify="right")
+
     #cuadros contacto paciente
-    cuadrotcelular_pac=Entry(raiz)
+    cuadrotcelular_pac=tk.Entry(raiz)
     cuadrotcelular_pac.place(x="550",y="150")
     cuadrotcelular_pac.config(justify="right")
-    cuadrotdireccion_pac=Entry(raiz)
+    cuadrotdireccion_pac=tk.Entry(raiz)
     cuadrotdireccion_pac.place(x="550",y="180")
     cuadrotdireccion_pac.config(justify="right")
-    cuadrottel_alter_pac=Entry(raiz)
+    cuadrottel_alter_pac=tk.Entry(raiz)
     cuadrottel_alter_pac.place(x="550",y="210")
     cuadrottel_alter_pac.config(justify="right")
-    cuadrotlocalidad_pac=Entry(raiz)
+    cuadrotlocalidad_pac=tk.Entry(raiz)
     cuadrotlocalidad_pac.place(x="550",y="240")
     cuadrotlocalidad_pac.config(justify="right")
-    cuadrotc_p_pac=Entry(raiz)
+    cuadrotc_p_pac=tk.Entry(raiz)
     cuadrotc_p_pac.place(x="550",y="270")
     cuadrotc_p_pac.config(justify="right")
-    cuadrotcorreo_elec_pac=Entry(raiz)
+    cuadrotcorreo_elec_pac=tk.Entry(raiz)
     cuadrotcorreo_elec_pac.place(x="550",y="300")
     cuadrotcorreo_elec_pac.config(justify="right")
 
     #datos obra social
-    lebeldatospac=Label(raiz, text="Obra Social Paciente", bg="orange", font=("comic sans ms",15),fg="white" )
+    lebeldatospac=Label(raiz, text="Obra Social Paciente", bg="cyan", font=("comic sans ms",15),fg="red" )
     lebeldatospac.place(x="50",y="350")
 
     lebelCoberturaSocial=Label(raiz, text="Cobertura Social", font=("comic sans ms",10),fg="Black" )
     lebelCoberturaSocial.place(x="50",y="410")
 
-    cuadrotCoberturaSocial=Entry(raiz)
+    cuadrotCoberturaSocial=tk.Entry(raiz)
     cuadrotCoberturaSocial.place(x="400",y="410")
     cuadrotCoberturaSocial.config(justify="right", width=50)
     
 
+    def registrar_pac():
+        Nombres_Pac = cuadrotnombre_pac.get()
+        Apellidos_Pac = cuadrotapellido_pac.get()
+        DNI_Pac = cuadrotdni_pac.get()
+        F_Nac_Pac = cuadrotfecha_nac_pac.get()
+        Cel_Pac = cuadrotcelular_pac.get()
+        Direc_Pac= cuadrotdireccion_pac.get()
+        Tel_Alt_Pac= cuadrottel_alter_pac.get()
+        Localid_Pac = cuadrotlocalidad_pac.get()
+        C_Post_pac = cuadrotc_p_pac.get()
+        C_Elect_Pac = cuadrotcorreo_elec_pac.get()
+        Cobertura_S_Pac = cuadrotCoberturaSocial.get()
 
-    # --------------------------------contraseña-----------------------------------
+        consul = "INSERT INTO paciente (Nombres, Apellidos, DNI, Fecha_Nacimiento, Num_Celular_Pac, Direccion_Pac, Tel_Alter_Pac, Localidad_Pac, Cod_Postal_Pac, Correo_Elect_Pac, Cobertura_Social_Pac) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        val = ( Nombres_Pac, Apellidos_Pac, int(DNI_Pac), F_Nac_Pac, int(Cel_Pac), Direc_Pac, int(Tel_Alt_Pac), Localid_Pac, int(C_Post_pac), C_Elect_Pac, Cobertura_S_Pac,)
+        cur.execute(consul, val)
+        ID_Paciente = cur.lastrowid
+        miCon.commit()
+        messagebox.showinfo(title=None, message="Registro Exitoso")
+        borrar_datos_adm()
 
-    #cuadrotcontraseña=Entry(miframe)
-    #cuadrotcontraseña.place(x="200",y="350")
-    #cuadrotcontraseña.config(justify="right",show="*")
-
-    # ---------------------------------botton---------------------------------
-    buttonregistrar=Button(raiz, text="REGISTRAR", font="15",  background="black", fg="red")
-    buttonregistrar.place(x="550",y="20")
+    
+    def borrar_datos_adm():
+        cuadrotnombre_pac.delete(0, tk.END)
+        cuadrotapellido_pac.delete(0, tk.END)
+        cuadrotdni_pac.delete(0, tk.END)
+        cuadrotfecha_nac_pac.delete(0, tk.END)
+        cuadrotcelular_pac.delete(0, tk.END)
+        cuadrotdireccion_pac.delete(0, tk.END)
+        cuadrottel_alter_pac.delete(0, tk.END)
+        cuadrotlocalidad_pac.delete(0, tk.END)
+        cuadrotc_p_pac.delete(0, tk.END)
+        cuadrotcorreo_elec_pac.delete(0, tk.END)
+        cuadrotCoberturaSocial.delete(0, tk.END)
+        
 
     def obras_sociales():
         webbrowser.open_new('https://sisa.msal.gov.ar/sisa/#sisa')
-    buttonbuscar=Button(raiz, text="BUSCAR", font="15",  background="black", fg="red")
-    buttonbuscar.place(x="400",y="20")
 
-    
-    buttonsigiente=Button(raiz, text="PUCO", font="15", background="black", fg="red", command=obras_sociales)
+
+    def buscar_por_dni():
+        cur.execute("SELECT * FROM paciente WHERE DNI='"+cuadrotdni_pac.get()+"'")
+        rows = cur.fetchall()
+        if rows:
+
+            for row in rows:
+                cuadrotnombre_pac.insert(0,row[1])
+                cuadrotapellido_pac.insert(0,row[2])
+                #cuadrotdni_pac.insert(0,row[3])
+                cuadrotfecha_nac_pac.insert(0,row[4])
+                cuadrotcelular_pac.insert(0,row[5])
+                cuadrotdireccion_pac.insert(0,row[6])
+                cuadrottel_alter_pac.insert(0,row[7])
+                cuadrotlocalidad_pac.insert(0,row[8])
+                cuadrotc_p_pac.insert(0,row[9])
+                cuadrotcorreo_elec_pac.insert(0,row[10])
+                cuadrotCoberturaSocial.insert(0,row[11])
+        else:
+            messagebox.showinfo(title="Buscar", message="Paciente no Registrado") 
+
+
+    # salir de la app
+    def cerrarSesion():
+        res=messagebox.askquestion(title=None, message="¿Desea Cerrar Sesión?", icon="question")
+        if res == "no":
+            pass   
+        else:
+            raiz.destroy()
+
+    #botones registro pacientes
+        
+    buttonsigiente=Button(raiz, text="PUCO", font="15", background="grey", fg="red", command=obras_sociales)
     buttonsigiente.place(x="400",y="350")
-    
-   
+    buttonsigiente.config(borderwidth=5, relief="raised")
 
+    buttonbuscar=Button(raiz, text="BUSCAR", command=buscar_por_dni, font="15",  background="grey", fg="red")
+    buttonbuscar.place(x="400",y="20")
+    buttonbuscar.config(borderwidth=5, relief="raised")
 
+    buttonregistrar=tk.Button(raiz, text="REGISTRAR", command=registrar_pac, font="15",  background="grey", fg="red")
+    buttonregistrar.pack()
+    buttonregistrar.place(x="507",y="20")
+    buttonregistrar.config(borderwidth=5, relief="raised")
 
-# salir de la app
-    def cerrarSecion():
-        raiz.destroy()
-
-    buttonCerrarSesion=Button(raiz, text="CERRAR SESION",command=cerrarSecion, font="15",  background="black", fg="red")
-    buttonCerrarSesion.place(x="300",y="500")
-
+    buttonlimpiar=tk.Button(raiz, text="LIMPIAR", command=borrar_datos_adm, font="15",  background="grey", fg="red")
+    buttonlimpiar.pack()
+    buttonlimpiar.place(x="630",y="20")
+    buttonlimpiar.config(borderwidth=5, relief="raised")
+            
+    buttonCerrarSesion=Button(raiz, text="CERRAR SESION",command=cerrarSesion, font="15",  background="grey", fg="red")
+    buttonCerrarSesion.place(x="300",y="470")
+    buttonCerrarSesion.config(borderwidth=5, relief="raised")
 
     raiz.mainloop()
+
     
-
-
-
-
-
-
-ventana.mainloop()
-
+loginframe.mainloop()
